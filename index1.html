@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Creative Space | 个人作品集</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1d1d1f;
+            --secondary: #f5f5f7;
+            --accent: #0071e3;
+            --border: #d2d2d7;
+            --card-bg: #ffffff;
+            --modal-overlay: rgba(0,0,0,0.4);
+        }
+
+        [data-theme="dark"] {
+            --bg: #000000;
+            --text: #f5f5f7;
+            --secondary: #1c1c1e;
+            --accent: #0a84ff;
+            --border: #38383a;
+            --card-bg: #1c1c1e;
+            --modal-overlay: rgba(255,255,255,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.3s ease; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5;
+        }
+
+        /* 导航栏 */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: var(--modal-overlay);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-right { display: flex; gap: 20px; align-items: center; }
+        .icon-btn { cursor: pointer; font-size: 1.2rem; background: none; border: none; color: var(--text); }
+
+        /* 主体布局 */
+        main { max-width: 1200px; margin: 100px auto; padding: 0 20px; }
+
+        .hero { text-align: center; margin-bottom: 60px; }
+        .hero h1 { font-size: 3rem; margin-bottom: 10px; }
+        .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .social-btn { 
+            padding: 8px 20px; border-radius: 20px; text-decoration: none; color: #fff; font-weight: 500;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .xhs { background: #ff2442; }
+        .ins { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+        /* 作品分类切换 */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
+        .tab-btn { 
+            padding: 10px 25px; border-radius: 30px; border: 1px solid var(--border);
+            background: var(--secondary); color: var(--text); cursor: pointer;
+        }
+        .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        /* 作品网格 */
+        .portfolio-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; min-height: 400px;
+        }
+        .work-card { 
+            background: var(--card-bg); border-radius: 15px; overflow: hidden;
+            border: 1px solid var(--border); position: relative;
+        }
+        .work-card img { width: 100%; height: 200px; object-fit: cover; }
+        .work-info { padding: 15px; }
+        .work-tag { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); font-weight: bold; }
+
+        /* 悬浮添加按钮 */
+        #fab {
+            position: fixed; bottom: 40px; right: 40px;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--accent); color: #fff; border: none;
+            font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+
+        /* 弹窗 */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal-content {
+            background: var(--card-bg); padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 500px;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--secondary); color: var(--text);
+        }
+        .submit-btn {
+            width: 100%; padding: 12px; background: var(--accent); color: #fff;
+            border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;
+        }
+
+        /* 播放器状态指示 */
+        .playing-info { font-size: 0.7rem; margin-right: 10px; opacity: 0.7; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="mainBgm" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <nav>
+        <div class="logo"><strong>CREATIVE.</strong></div>
+        <div class="nav-right">
+            <span class="playing-info" id="musicStatus">BGM 已静音</span>
+            <button class="icon-btn" onclick="toggleMusic()"><i id="musicIcon" class="fas fa-volume-mute"></i></button>
+            <button class="icon-btn" onclick="toggleTheme()"><i id="themeIcon" class="fas fa-moon"></i></button>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>你好，我是创作者</h1>
+            <p>专注于视觉表达与内容创作的数字游民</p>
+            <div class="social-links">
+                <a href="#" class="social-btn xhs"><i class="fab fa-gratipay"></i> 小红书</a>
+                <a href="#" class="social-btn ins"><i class="fab fa-instagram"></i> Instagram</a>
+            </div>
+        </section>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="filterWorks('all')">全部</button>
+            <button class="tab-btn" onclick="filterWorks('photo')">摄影</button>
+            <button class="tab-btn" onclick="filterWorks('poster')">海报</button>
+            <button class="tab-btn" onclick="filterWorks('ppt')">PPT</button>
+            <button class="tab-btn" onclick="filterWorks('video')">视频</button>
+            <button class="tab-btn" onclick="filterWorks('article')">文章</button>
+        </div>
+
+        <div class="portfolio-grid" id="portfolioGrid">
+            </div>
+    </main>
+
+    <button id="fab" onclick="openModal()"><i class="fas fa-plus"></i></button>
+
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">添加新作品</h2>
+            <div class="form-group">
+                <label>作品类型</label>
+                <select id="newType">
+                    <option value="photo">摄影作品</option>
+                    <option value="poster">海报作品</option>
+                    <option value="ppt">PPT作品</option>
+                    <option value="video">视频作品</option>
+                    <option value="article">文章作品</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>作品标题</label>
+                <input type="text" id="newTitle" placeholder="输入标题...">
+            </div>
+            <div class="form-group">
+                <label>选择文件</label>
+                <input type="file" id="newFile" accept="image/*,video/*,.pdf">
+            </div>
+            <button class="submit-btn" onclick="addWork()">发布作品</button>
+            <button class="submit-btn" style="background:none; color:var(--text); margin-top:10px;" onclick="closeModal()">取消</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 模拟数据 ---
+        let works = [
+            { id: 1, type: 'photo', title: '极简建筑', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=500&q=60' },
+            { id: 2, type: 'poster', title: '夏日音乐节海报', img: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=500&q=60' },
+            { id: 3, type: 'article', title: '关于未来设计的思考', img: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=500&q=60' },
+            { id: 4, type: 'video', title: '城市生活 Vlog', img: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=500&q=60' }
+        ];
+
+        // --- 核心功能渲染 ---
+        const grid = document.getElementById('portfolioGrid');
+
+        function renderWorks(filter = 'all') {
+            grid.innerHTML = '';
+            const filtered = filter === 'all' ? works : works.filter(w => w.type === filter);
+            
+            filtered.forEach(work => {
+                const card = document.createElement('div');
+                card.className = 'work-card';
+                card.innerHTML = `
+                    <img src="${work.img}" alt="${work.title}">
+                    <div class="work-info">
+                        <span class="work-tag">${work.type}</span>
+                        <h4>${work.title}</h4>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterWorks(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.toLowerCase().includes(type) || (type === 'all' && btn.innerText === '全部'));
+            });
+            renderWorks(type);
+        }
+
+        // --- 暗黑模式 ---
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+            }
+        }
+
+        // --- BGM 控制 ---
+        const audio = document.getElementById('mainBgm');
+        const mIcon = document.getElementById('musicIcon');
+        const mStatus = document.getElementById('musicStatus');
+        
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+                mIcon.className = 'fas fa-volume-up';
+                mStatus.innerText = 'Now Playing...';
+            } else {
+                audio.pause();
+                mIcon.className = 'fas fa-volume-mute';
+                mStatus.innerText = 'BGM 已静音';
+            }
+        }
+
+        // --- 弹窗逻辑 ---
+        function openModal() { document.getElementById('addModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
+        function addWork() {
+            const type = document.getElementById('newType').value;
+            const title = document.getElementById('newTitle').value;
+            const fileInput = document.getElementById('newFile');
+
+            if (!title) return alert('请输入标题');
+
+            // 模拟文件处理：实际开发中这里会上传到服务器并获取 URL
+            const newWork = {
+                id: Date.now(),
+                type: type,
+                title: title,
+                img: 'https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?auto=format&fit=crop&w=500&q=60' // 默认占位图
+            };
+
+            works.unshift(newWork); // 添加到开头
+            renderWorks();
+            closeModal();
+            alert('添加成功！（由于这是本地演示，刷新后将恢复初始状态）');
+        }
+
+        // 初始化渲染
+        renderWorks();
+    </script>
+</body>
+</html>
